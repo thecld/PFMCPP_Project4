@@ -15,11 +15,7 @@ New/This/Pointers/References conclusion
  */
 
 struct HeapA;
-struct A
-{
-    A(HeapA& hA) : hA_(hA) {}
-    HeapA& hA_;
-};
+struct A { A(HeapA& hA) : hA_(hA) {} HeapA& hA_; };
 struct HeapA
 {
     HeapA() : a(*this) {}
