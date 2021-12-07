@@ -418,21 +418,21 @@ void Point::toString()
 }
 
 //overloaded functions
-FloatType& FloatType::pow(const FloatType& f) { powInternal(f); return *this; }
-FloatType& FloatType::pow(const DoubleType& f) { powInternal(static_cast<float>(f)); return *this; }
-FloatType& FloatType::pow(const IntType& f) { powInternal(static_cast<float>(f)); return *this; }
+FloatType& FloatType::pow(const FloatType& f) { return powInternal(f); }
+FloatType& FloatType::pow(const DoubleType& f) { return powInternal(static_cast<float>(f));}
+FloatType& FloatType::pow(const IntType& f) { return powInternal(static_cast<float>(f));}
 
-DoubleType& DoubleType::pow(const FloatType& d) { powInternal(static_cast<double>(d)); return *this; }
-DoubleType& DoubleType::pow(const DoubleType& d) { powInternal(d); return *this; }
-DoubleType& DoubleType::pow(const IntType& d) { powInternal(static_cast<double>(d)); return *this; }
+DoubleType& DoubleType::pow(const FloatType& d) { return powInternal(static_cast<double>(d)); }
+DoubleType& DoubleType::pow(const DoubleType& d) { return powInternal(d); }
+DoubleType& DoubleType::pow(const IntType& d) { return powInternal(static_cast<double>(d)); }
 
-IntType& IntType::pow(const FloatType& i) { powInternal(static_cast<int>(i)); return *this; }
-IntType& IntType::pow(const DoubleType& i) { powInternal(static_cast<int>(i)); return *this; }
-IntType& IntType::pow(const IntType& i) { powInternal(i); return *this; }
+IntType& IntType::pow(const FloatType& i) { return powInternal(static_cast<int>(i)); }
+IntType& IntType::pow(const DoubleType& i) { return powInternal(static_cast<int>(i)); }
+IntType& IntType::pow(const IntType& i) { return powInternal(i); }
 
-Point& Point::multiply(const FloatType& m) { x *= m; y *= m; return *this; }
-Point& Point::multiply(const DoubleType& m) { x *= static_cast<float>(m); y *= static_cast<float>(m);  return *this; }
-Point& Point::multiply(const IntType& m) { x *= static_cast<float>(m); y *= static_cast<float>(m);  return *this; }
+Point& Point::multiply(const FloatType& m_) { return multiply(static_cast<float>(m_)); }
+Point& Point::multiply(const DoubleType& m_) { return multiply(static_cast<float>(m_)); }
+Point& Point::multiply(const IntType& m_) { return multiply(static_cast<float>(m_)); }
 
 
 void part3()
