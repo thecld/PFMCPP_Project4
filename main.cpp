@@ -219,8 +219,7 @@ private:
 
 FloatType& FloatType::pow(float rhs)
 {
-    powInternal(rhs);
-    return *this;
+    return powInternal(rhs);
 }
 
 FloatType& FloatType::powInternal(float arg)
@@ -283,8 +282,7 @@ private:
 
 DoubleType& DoubleType::pow(double rhs)
 {
-    powInternal(rhs);
-    return *this;
+    return powInternal(rhs);
 }
 
 DoubleType& DoubleType::powInternal(double arg)
@@ -345,8 +343,7 @@ private:
 
 IntType& IntType::pow(int rhs)
 {
-    powInternal(rhs);
-    return *this;
+    return powInternal(rhs);
 }
 
 IntType& IntType::powInternal(int arg)
