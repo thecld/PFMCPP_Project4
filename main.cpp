@@ -222,8 +222,8 @@ struct FloatType
     FloatType& pow(const IntType& rhs);
     FloatType& pow(float rhs);
 
-    FloatType& apply(std::function<FloatType&(std::unique_ptr<float>&)> ft_);
-    FloatType& apply(void(*ft_)(std::unique_ptr<float>&));
+    FloatType& apply(std::function<FloatType&(std::unique_ptr<float>&)> ftLamb);
+    FloatType& apply(void(*ftPtr)(std::unique_ptr<float>&));
 
     operator float() const { return *value; }
 
@@ -232,17 +232,17 @@ private:
     FloatType& powInternal(float arg);
 };
 
-FloatType& FloatType::apply(std::function<FloatType&(std::unique_ptr<float>&)> ft_)
+FloatType& FloatType::apply(std::function<FloatType&(std::unique_ptr<float>&)> ftLamb)
 {
-    if ( ft_ )
-        return ft_(value);
+    if ( ftLamb )
+        return ftLamb(value);
     return *this;
 }
 
-FloatType& FloatType::apply(void(*ft_)(std::unique_ptr<float>&))
+FloatType& FloatType::apply(void(*ftPtr)(std::unique_ptr<float>&))
 {
-    if( ft_ )
-        ft_(value);
+    if( ftPtr )
+        ftPtr(value);
     return *this;
 }
 
@@ -281,10 +281,10 @@ FloatType& FloatType::operator/=( float rhs )
     return *this;
 }
 
-void myFloatFreeFunct(std::unique_ptr<float>& ft_)
+void myFloatFreeFunct(std::unique_ptr<float>& ftPtr)
 {
-    float& ft__ = *ft_;
-    ft__ += 7.f;
+    float& ftFreeFunc = *ftPtr;
+    ftFreeFunc += 7.f;
 }
 
 
@@ -308,8 +308,8 @@ struct DoubleType
     DoubleType& pow(const DoubleType& rhs);
     DoubleType& pow(const IntType& rhs);
 
-    DoubleType& apply(std::function<DoubleType&(double&)> dt_);
-    DoubleType& apply(void(*dt_)(double&));
+    DoubleType& apply(std::function<DoubleType&(double&)> dtLamb);
+    DoubleType& apply(void(*dtPtr)(double&));
 
     operator double() const { return *value; }
 
@@ -318,17 +318,17 @@ private:
     DoubleType& powInternal(double arg);
 };
 
-DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> dt_)
+DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> dtLamb)
 {
-    if ( dt_ )
-        return dt_(*value);
+    if ( dtLamb )
+        return dtLamb(*value);
     return *this;
 }
 
-DoubleType& DoubleType::apply(void(*dt_)(double&))
+DoubleType& DoubleType::apply(void(*dtPtr)(double&))
 {
-    if( dt_ )
-        dt_(*value);
+    if( dtPtr )
+        dtPtr(*value);
     return *this;
 }
 
@@ -367,10 +367,10 @@ DoubleType& DoubleType::operator/=( double rhs )
     return *this;
 }
 
-void myDoubleFreeFunct(double& dt_)
+void myDoubleFreeFunct(double& dtPtr)
 {
-    double& dt__ = dt_;
-    dt__ += 6.0;
+    double& dtFreeFunc = dtPtr;
+    dtFreeFunc += 6.0;
 }
 
 struct IntType
@@ -392,8 +392,8 @@ struct IntType
     IntType& pow(const DoubleType& rhs);
     IntType& pow(const IntType& rhs);
 
-    IntType& apply(std::function<IntType&(int&)> iiit_);
-    IntType& apply(void(*iiit_)(int&));
+    IntType& apply(std::function<IntType&(int&)> itLamb);
+    IntType& apply(void(*itPtr)(int&));
 
     operator int() const { return *value; }
 
@@ -402,17 +402,17 @@ private:
     IntType& powInternal(int arg);
 };
 
-IntType& IntType::apply(std::function<IntType&(int&)> it_)
+IntType& IntType::apply(std::function<IntType&(int&)> itLamb)
 {
-    if ( it_ )
-        return it_(*value);
+    if ( itLamb )
+        return itLamb(*value);
     return *this;
 }
 
-IntType& IntType::apply(void(*it_)(int&))
+IntType& IntType::apply(void(*itPtr)(int&))
 {
-    if( it_ )
-        it_(*value);
+    if( itPtr )
+        itPtr(*value);
     return *this;
 }
 
@@ -452,10 +452,10 @@ IntType& IntType::operator/=( int rhs )
     return *this;
 }
 
-void myIntFreeFunct(int& it_)
+void myIntFreeFunct(int& itPtr)
 {
-    int& it__ = it_;
-    it__ += 5;
+    int& itFreeFunc = itPtr;
+    itFreeFunc += 5;
 }
 
 struct Point
@@ -641,7 +641,7 @@ void part6()
     
     std::cout << "Calling FloatType::apply() using a lambda (adds 7.0f) and FloatType as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
-    ft3.apply( [&](std::unique_ptr<float>& ft_) -> FloatType& {*ft_ += 7.f; return ft3;});
+    ft3.apply( [&](std::unique_ptr<float>& ftLamb) -> FloatType& {*ftLamb += 7.f; return ft3;});
     std::cout << "ft3 after: " << ft3 << std::endl;
     std::cout << "Calling FloatType::apply() using a free function (adds 7.0f) and void as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
@@ -651,7 +651,7 @@ void part6()
 
     std::cout << "Calling DoubleType::apply() using a lambda (adds 6.0) and DoubleType as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
-    dt3.apply( [&](double& dt___) -> DoubleType& {dt___ += 6.0; return dt3;} );
+    dt3.apply( [&](double& dtLamb) -> DoubleType& {dtLamb += 6.0; return dt3;} );
     std::cout << "dt3 after: " << dt3 << std::endl;
     std::cout << "Calling DoubleType::apply() using a free function (adds 6.0) and void as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
@@ -661,7 +661,7 @@ void part6()
 
     std::cout << "Calling IntType::apply() using a lambda (adds 5) and IntType as return type:" << std::endl;
     std::cout << "it3 before: " << it3 << std::endl;
-    it3.apply( [&](int& it) -> IntType& {it += 5; return it3;} );
+    it3.apply( [&](int& itLamb) -> IntType& {itLamb += 5; return it3;} );
     std::cout << "it3 after: " << it3 << std::endl;
     std::cout << "Calling IntType::apply() using a free function (adds 5) and void as return type:" << std::endl;
     std::cout << "it3 before: " << it3 << std::endl;
