@@ -294,6 +294,108 @@ struct IntType;
 struct FloatType;
 struct DoubleType;
 
+template<typename NumericType>
+struct Numeric
+{
+    using Type = NumericType;
+
+    explicit Numeric(Type ft) : value( std::make_unique<Type>(ft) ) { }
+
+    Numeric& operator+=(const Type& rhs)
+    {
+        *value += rhs;
+        return *this;
+    }
+
+    Numeric& operator-=(const Type& rhs)
+    {
+        *value -= rhs;
+        return *this;
+    }
+
+    Numeric& operator*=(const Type& rhs)
+    {
+        *value *= rhs;
+        return *this;
+    }
+
+    /*
+    - in plain-english, you'll need to implement this logic:
+    if your class template type is an int
+            if your parameter's type is also an int
+                    if your parameter's value is 0
+                            don't do the division
+            else if your parameter's value is less than epsilon
+                    dont do the divison
+    else if your parameter's value is less than epsilon
+            warn about doing the division
+
+    - to make these checks work during compilation, your if() statements will need to be 'constexpr':  if constexpr (expression)
+
+    - pay attention to the 2nd line in the plain-english logic.
+            most people don't get this part of the assignment correct.
+    */
+    Numeric& operator/=(const Type& rhs)
+    {
+
+    }
+
+    Numeric& pow(const Type& rhs)
+    {
+        return powInternal(rhs);
+    }   
+
+    Numeric& apply(std::function<Numeric&(std::unique_ptr<Type>&)> ftLamb)
+    {
+        if ( ftLamb )
+            return ftLamb(value);
+        return *this;
+    }
+    Numeric& apply(void(*ftPtr)(std::unique_ptr<Type>&))
+    {
+        if( ftPtr )
+            ftPtr(value);
+        return *this;
+    }
+
+    operator Type() const { return *value; }
+
+private:
+    std::unique_ptr<Type> value;
+    Numeric& powInternal(Type arg);
+    {
+        *value = std::pow( *value, arg );
+        return *this;
+    }
+};
+
+template<typename NumericType>
+void myFloatFreeFunct(std::unique_ptr<NumericType>& ftPtr)
+{
+    NumericType& ftFreeFunc = *ftPtr;
+    ftFreeFunc += static_cast<NumericType>(7.0);
+}
+
+
+
+
+
+
+Numeric& Numeric::operator/=( float rhs )
+{
+    if (rhs == 0.f)
+        std::cout << "warning: floating point division by zero!" << "\n";
+        
+    *value /= rhs;
+    return *this;
+}
+
+void myFloatFreeFunct(std::unique_ptr<Type>& ftPtr)
+{
+    Type& ftFreeFunc = *ftPtr;
+    ftFreeFunc += 7.f;
+}
+
 struct FloatType
 {
     explicit FloatType(float ft) : value( std::make_unique<float>(ft) ) { }
@@ -377,12 +479,7 @@ void myFloatFreeFunct(std::unique_ptr<float>& ftPtr)
 
 struct DoubleType
 {   
-    explicit DoubleType(double dt) : value(new double(dt)) {}
-    ~DoubleType()
-    {
-        delete value;
-        value = nullptr;
-    }
+    explicit DoubleType(float dt) : value( std::make_unique<double>(dt) ) { }
 
     DoubleType& operator+=( double rhs );
     DoubleType& operator-=( double rhs );
@@ -394,24 +491,24 @@ struct DoubleType
     DoubleType& pow(const DoubleType& rhs);
     DoubleType& pow(const IntType& rhs);
 
-    DoubleType& apply(std::function<DoubleType&(double&)> dtLamb);
-    DoubleType& apply(void(*dtPtr)(double&));
+    DoubleType& apply(std::function<DoubleType&(std::unique_ptr<double>&)> dtLamb);
+    DoubleType& apply(void(*dtPtr)(std::unique_ptr<double>&));
 
     operator double() const { return *value; }
 
 private:
-    double* value = nullptr;
+    std::unique_ptr<double> value;
     DoubleType& powInternal(double arg);
 };
 
-DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> dtLamb)
+DoubleType& DoubleType::apply(std::function<DoubleType&(std::unique_ptr<double>&)> dtLamb)
 {
     if ( dtLamb )
         return dtLamb(*value);
     return *this;
 }
 
-DoubleType& DoubleType::apply(void(*dtPtr)(double&))
+DoubleType& DoubleType::apply(void(*dtPtr)(std::unique_ptr<double>&))
 {
     if( dtPtr )
         dtPtr(*value);
@@ -453,7 +550,7 @@ DoubleType& DoubleType::operator/=( double rhs )
     return *this;
 }
 
-void myDoubleFreeFunct(double& dtPtr)
+void myDoubleFreeFunct(std::unique_ptr<double>& dtPtr)
 {
     double& dtFreeFunc = dtPtr;
     dtFreeFunc += 6.0;
@@ -461,12 +558,7 @@ void myDoubleFreeFunct(double& dtPtr)
 
 struct IntType
 {
-    explicit IntType(int it) : value(new int(it)) {}
-    ~IntType()
-    {
-        delete value;
-        value = nullptr;
-    }
+    explicit IntType(int it) : value( std::make_unique<int>(it) ) { }
 
     IntType& operator+=( int rhs );
     IntType& operator-=( int rhs );
@@ -478,24 +570,24 @@ struct IntType
     IntType& pow(const DoubleType& rhs);
     IntType& pow(const IntType& rhs);
 
-    IntType& apply(std::function<IntType&(int&)> itLamb);
-    IntType& apply(void(*itPtr)(int&));
+    IntType& apply(std::function<IntType&(std::unique_ptr<int>&)> itLamb);
+    IntType& apply(void(*itPtr)(std::unique_ptr<int>&));
 
     operator int() const { return *value; }
 
 private:
-    int* value = nullptr;
+    std::unique_ptr<int> value;
     IntType& powInternal(int arg);
 };
 
-IntType& IntType::apply(std::function<IntType&(int&)> itLamb)
+IntType& IntType::apply(std::function<IntType&(std::unique_ptr<int>&)> itLamb)
 {
     if ( itLamb )
         return itLamb(*value);
     return *this;
 }
 
-IntType& IntType::apply(void(*itPtr)(int&))
+IntType& IntType::apply(void(*itPtr)(std::unique_ptr<int>&))
 {
     if( itPtr )
         itPtr(*value);
@@ -538,7 +630,7 @@ IntType& IntType::operator/=( int rhs )
     return *this;
 }
 
-void myIntFreeFunct(int& itPtr)
+void myIntFreeFunct(std::unique_ptr<int>& itPtr)
 {
     int& itFreeFunc = itPtr;
     itFreeFunc += 5;
@@ -718,7 +810,7 @@ void part4()
     p3.toString();   
     std::cout << "---------------------\n" << std::endl;
 }
-
+/*
 void part6()
 {
     FloatType ft3(3.0f);
@@ -754,7 +846,7 @@ void part6()
     it3.apply(myIntFreeFunct);
     std::cout << "it3 after: " << it3 << std::endl;
     std::cout << "---------------------\n" << std::endl; 
-}
+}*/
 
 int main()
 {   
@@ -821,7 +913,7 @@ int main()
 
     part4();
 
-    part6();
+    //part6();
 
     std::cout << "good to go!\n";
 
