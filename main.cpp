@@ -319,25 +319,31 @@ struct Numeric
         return *this;
     }
 
-    /*
-    - in plain-english, you'll need to implement this logic:
-    if your class template type is an int
-            if your parameter's type is also an int
-                    if your parameter's value is 0
-                            don't do the division
-            else if your parameter's value is less than epsilon
-                    dont do the divison
-    else if your parameter's value is less than epsilon
-            warn about doing the division
-
-    - to make these checks work during compilation, your if() statements will need to be 'constexpr':  if constexpr (expression)
-
-    - pay attention to the 2nd line in the plain-english logic.
-            most people don't get this part of the assignment correct.
-    */
-    Numeric& operator/=(const Type& rhs)
+    template<typename DividedByType>
+    Numeric& operator/=(const DividedByType& rhs)
     {
+        if constexpr (std::is_same<Type>, int>::value)
+        {
+            if constexpr (std::is_same<DividedByType>, int>::value)
+            {
+                if (rhs == 0)
+                {
+                    std::cout << "error: integer division by zero is an error and will crash the program!\n";
+                    return *this
+                }
+            }
+            else if constexpr (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
+            {
+                std::cout << "warning: floating point division by zero!" << "\n";
+            }
+        }
+        else if constexpr (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
+        {
+            std::cout << "warning: floating point division by zero!" << "\n";
+        }
 
+        *value /= rhs;
+        return *this;
     }
 
     Numeric& pow(const Type& rhs)
@@ -375,6 +381,103 @@ void myFloatFreeFunct(std::unique_ptr<NumericType>& ftPtr)
     NumericType& ftFreeFunc = *ftPtr;
     ftFreeFunc += static_cast<NumericType>(7.0);
 }
+
+template<>
+struct Numeric<double>
+{
+    using Type = double;
+
+    explicit Numeric(Type ft) : value( std::make_unique<Type>(ft) ) { }
+
+    Numeric& operator+=(const Type& rhs)
+    {
+        *value += rhs;
+        return *this;
+    }
+
+    Numeric& operator-=(const Type& rhs)
+    {
+        *value -= rhs;
+        return *this;
+    }
+
+    Numeric& operator*=(const Type& rhs)
+    {
+        *value *= rhs;
+        return *this;
+    }
+
+    template<typename DividedByType>
+    Numeric& operator/=(const DividedByType& rhs)
+    {
+        if constexpr (std::is_same<Type>, int>::value)
+        {
+            if constexpr (std::is_same<DividedByType>, int>::value)
+            {
+                if (rhs == 0)
+                {
+                    std::cout << "error: integer division by zero is an error and will crash the program!\n";
+                    return *this
+                }
+            }
+            else if constexpr (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
+            {
+                std::cout << "warning: floating point division by zero!" << "\n";
+            }
+        }
+        else if constexpr (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
+        {
+            std::cout << "warning: floating point division by zero!" << "\n";
+        }
+
+        *value /= rhs;
+        return *this;
+    }
+
+    Numeric& pow(const Type& rhs)
+    {
+        return powInternal(rhs);
+    }   
+    /*
+    Numeric& apply(std::function<Numeric&(std::unique_ptr<Type>&)> ftLamb)
+    {
+        if ( ftLamb )
+            return ftLamb(value);
+        return *this;
+    }
+    Numeric& apply(void(*ftPtr)(std::unique_ptr<Type>&))
+    {
+        if( ftPtr )
+            ftPtr(value);
+        return *this;
+    }*/
+
+    template<typename Callable>
+    Numeric& apply(Callable&& ftLamb)
+    {
+        ftLamb(value);
+        return *this;
+    }
+
+    /*
+    template<typename Callable>                         // #7)
+    Numeric& apply(Callable&& f)
+    {
+        f(ud);  
+        
+        return *this;
+    }*/
+
+    operator Type() const { return *value; }
+
+private:
+    std::unique_ptr<Type> value;
+    Numeric& powInternal(Type arg);
+    {
+        *value = std::pow( *value, arg );
+        return *this;
+    }
+};
 
 
 
