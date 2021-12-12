@@ -360,26 +360,8 @@ struct Numeric<double>
     template<typename DividedByType>
     Numeric& operator/=(const DividedByType& rhs)
     {
-        if constexpr (std::is_same<Type, int>::value)
-        {
-            if constexpr (std::is_same<DividedByType, int>::value)
-            {
-                if (rhs == 0)
-                {
-                    std::cout << "error: integer division by zero is an error and will crash the program!\n";
-                    return *this;
-                }
-            }
-            else if (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
-            {
-                std::cout << "warning: floating point division by zero!" << "\n";
-            }
-        }
-        else if (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
-        {
+        if (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
             std::cout << "warning: floating point division by zero!" << "\n";
-        }
-
         *value /= rhs;
         return *this;
     }
@@ -388,19 +370,6 @@ struct Numeric<double>
     {
         return powInternal(rhs);
     }   
-    /*
-    Numeric& apply(std::function<Numeric&(std::unique_ptr<Type>&)> ftLamb)
-    {
-        if ( ftLamb )
-            return ftLamb(value);
-        return *this;
-    }
-    Numeric& apply(void(*ftPtr)(std::unique_ptr<Type>&))
-    {
-        if( ftPtr )
-            ftPtr(value);
-        return *this;
-    }*/
 
     template<typename Callable>
     Numeric& apply(Callable&& ftLamb)
@@ -408,15 +377,6 @@ struct Numeric<double>
         ftLamb(value);
         return *this;
     }
-
-    /*
-    template<typename Callable>                         // #7)
-    Numeric& apply(Callable&& f)
-    {
-        f(ud);  
-        
-        return *this;
-    }*/
 
     operator Type() const { return *value; }
 
