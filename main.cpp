@@ -360,7 +360,7 @@ struct Numeric<double>
     template<typename DividedByType>
     Numeric& operator/=(const DividedByType& rhs)
     {
-        if (std::abs(rhs) <= std::numeric_limits<DividedByType>::epsilon())
+        if (rhs == 0.0)
             std::cout << "warning: floating point division by zero!" << "\n";
         *value /= rhs;
         return *this;
