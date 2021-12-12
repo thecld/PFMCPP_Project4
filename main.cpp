@@ -357,8 +357,7 @@ struct Numeric<double>
         return *this;
     }
 
-    template<typename DividedByType>
-    Numeric& operator/=(const DividedByType& rhs)
+    Numeric& operator/=(const Type& rhs)
     {
         if (rhs == 0.0)
             std::cout << "warning: floating point division by zero!" << "\n";
