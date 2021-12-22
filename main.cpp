@@ -81,7 +81,6 @@ struct Temporary
     ~Temporary() { }
 
     Temporary(Temporary&& other) : v(std::move(other.v)) { }
-
     Temporary& operator=(Temporary&& other) { v = std::move(other.v); return *this; }
 
  
@@ -133,7 +132,7 @@ struct Numeric
 {
     using Type = Temporary<NumericType>;
 
-    Numeric(Type ft) : value( std::make_unique<Type>(ft) ) { }
+    Numeric(NumericType ft) : value( std::make_unique<Type>(ft) ) { }
     ~Numeric() { value = nullptr; }
 
     Numeric(Numeric&& other) : value(std::move(other.value)) { }
